@@ -1,6 +1,7 @@
 /*
    Web to LCD (ESP8266 Only, no Arduino) by www.varind.com 2016. This code is public domain, enjoy!
-   https://github.com/varind/ESP8266-Web-To-LCD
+   Latest code: https://github.com/varind/ESP8266-Web-To-LCD-2
+   Project page: : http://www.variableindustries.com/web-to-lcd-2/
 */
 
 #include <LiquidCrystal.h>
