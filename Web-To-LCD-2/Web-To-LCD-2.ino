@@ -266,6 +266,7 @@ byte dataInstance = 0;
 
 
 
+
 void setup() {
   Serial.begin(115200);
   delay(10);
@@ -277,44 +278,46 @@ void setup() {
 
   lcd.setCursor(0, 0);
   lcd.print("    STARTING UP    ");
-  lcd.setCursor(0, 1);
 
   WiFi.softAPConfig(apIP, apIP, netMsk);
   WiFi.softAP(ESPssid, ESPpassword);
   delay(500); // Without delay I've seen the IP address blank
-
-  lcd.print("AP IP: ");
-  lcd.print(WiFi.softAPIP());
-  delay(500);
-
-  Serial.print(">> AP IP address: ");
-  Serial.println(WiFi.softAPIP());
-
+  
   /* Setup web pages: root, wifi config pages, and not found. */
   server.on("/", handleRoot);
   server.on("/wifi", handleWifi);
   server.on("/wifisave", handleWifiSave);
   server.onNotFound ( handleNotFound );
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("   SETTING UP MDNS  ");
-
-  lcd.setCursor(0, 1);
-  while (!MDNS.begin(host)) {
-    lcd.print(".");
-    Serial.println(">> Error setting up MDNS responder!");
-    delay(1000);
-  }
-
   httpUpdater.setup(&server);
   server.begin(); // Web server start
-  MDNS.addService("http", "tcp", 80);
 
   Serial.println(">> HTTP server started");
   loadCredentials(); // Load WLAN credentials from network
   connect = strlen(ssid) > 0; // Request WLAN connect if there is a SSID
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("   SETTING UP MDNS  ");
+  lcd.setCursor(0, 1);
+
+  int timeout = 0;
+  while (!MDNS.begin(host)) {
+    lcd.print(".");
+    Serial.println(">> Error setting up MDNS responder!");
+    delay(1000);
+    timeout++;
+    if (timeout == 10) {
+      Serial.println(">> Setting up MDNS failed!");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("     MDNS FAILED    ");
+      delay(500);
+      break;
+    }
+  }
+
+  MDNS.addService("http", "tcp", 80);
   Serial.println();
   Serial.println(">> HTTPUpdateServer ready!");
   Serial.printf(">> Open http://%s.local/update in your browser\n", host);
