@@ -264,14 +264,12 @@ const byte customElementsArrayLength = sizeof(customBiasElements) / sizeof(*cust
 byte dataInstance = 0;
 #endif
 
-
-
-
 void setup() {
   Serial.begin(115200);
   delay(10);
   lcd.begin(lcdCols, lcdRows);
   lcd.clear();
+  
 #ifdef BIGTEXT
   createChars();                            // for large font
 #endif
@@ -282,8 +280,6 @@ void setup() {
   WiFi.softAPConfig(apIP, apIP, netMsk);
   WiFi.softAP(ESPssid, ESPpassword);
   delay(500); // Without delay I've seen the IP address blank
-
-
 
   /* Setup web pages: root, wifi config pages, and not found. */
   server.on("/", handleRoot);
@@ -299,40 +295,16 @@ void setup() {
   loadCredentials(); // Load WLAN credentials from network
   connect = strlen(ssid) > 0; // Request WLAN connect if there is a SSID
 
-  connectRequest();
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("   SETTING UP MDNS  ");
-  lcd.setCursor(0, 1);
-
-  int timeout = 0;
-  while (!MDNS.begin(host)) {
-    lcd.print(".");
-    Serial.println(">> Error setting up MDNS responder!");
-    delay(1000);
-    timeout++;
-    if (timeout == 20) {
-      Serial.println(">> Setting up MDNS failed!");
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("     MDNS FAILED    ");
-      delay(500);
-      break;
-    }
-  }
-
-  MDNS.addService("http", "tcp", 80);
-  Serial.println();
-  Serial.println(">> HTTPUpdateServer ready!");
-  Serial.printf(">> Open http://%s.local/update in your browser\n", host);
-  Serial.println("");
 }
 
 void loop() {
   connectRequest();
   server.handleClient();
-  if (WiFi.status() == WL_CONNECTED) {
+  getAndDisplay();
+}
+
+void getAndDisplay(){
+    if (WiFi.status() == WL_CONNECTED) {
     if (timer + reloadDelay < millis() || jumpStart) {
       getData();
       if (clientConnected) {
@@ -606,6 +578,38 @@ void printDataToLCD() {
   }
 }
 
+void MDNSSetup(){
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("   SETTING UP MDNS  ");
+  lcd.setCursor(0, 1);
+
+  int timeout = 0;
+  bool MDNSStatus = true;
+  while (!MDNS.begin(host)) {
+    lcd.print(".");
+    Serial.println(">> Error setting up MDNS responder!");
+    delay(1000);
+    timeout++;
+    if (timeout == 20) {
+      Serial.println(">> Setting up MDNS failed!");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("     MDNS FAILED    ");
+      MDNSStatus = false;
+      delay(500);
+      break;
+    }
+  }
+  if (MDNSStatus){
+  MDNS.addService("http", "tcp", 80);
+  Serial.println();
+  Serial.println(">> HTTPUpdateServer ready!");
+  Serial.printf(">> Open http://%s.local/update in your browser\n", host);
+  Serial.println("");
+  }
+}
 
 void connectWifi() {
   Serial.println(">> Connecting as wifi client...");
@@ -658,6 +662,9 @@ void connectRequest() {
         Serial.println(WiFi.localIP());
 
         delay(3000);
+
+        MDNSSetup();
+        
       } else if (s == WL_NO_SSID_AVAIL) {
         WiFi.disconnect();
       }
