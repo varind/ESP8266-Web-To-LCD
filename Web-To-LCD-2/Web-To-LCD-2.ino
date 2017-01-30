@@ -55,7 +55,7 @@ IPAddress netMsk(255, 255, 255, 0);
 bool debug = true;
 
 const char *ESPssid = "News LCD";
-const char *ESPpassword = "sausages";
+const char *ESPpassword = "PICK A PASSWORD";
 const char* host = "news";
 byte lcdRows = 4;
 byte lcdCols = 20;
@@ -109,43 +109,6 @@ boolean connect;
 uint32_t lastConnectTry = 0;
 int status = WL_IDLE_STATUS;
 
-void news() {
-  //----------------------------------------------------------------------------------|
-  //                                  NEWS LOOOKUP
-  //https://api.newslookup.com/feed/ustv?fmt=&limit=1&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc
-  //https://api.newslookup.com/feed/live?fmt=&limit=1&mt=3&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc
-  //https://api.newslookup.com/feed/live?fmt=&limit=1&region=gi100&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc
-  //https://api.newslookup.com/feed/usnp?fmt=&limit=1&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc
-  //https://api.newslookup.com/feed/wires?fmt=&limit=1&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc
-
-  //----------------------------------------------------------------------------------|
-  char NEWSLOOKUPdataServer[] = "api.newslookup.com";
-  char NEWSLOOKUPdataPage[] =
-      "/feed/ustv?fmt=&limit=1&client_id=17114&secret=f6a119e426b9574bc638391eb6c227cc";
-  const char* NEWSLOOKUPelements[] = { "\">", "<title>" };
-  const char* NEWSLOOKUPelementPreLabels[] = { "", "" };
-  const char* NEWSLOOKUPelementPostLabels[] = { ": ", "" };
-  char NEWSLOOKUPdataEnd[] = { "</" };
-  char NEWSLOOKUPelementCols[] = { 1 };
-  normalStartBias = 0;
-  normalEndBias = 0;
-  maxDataLength = 200;
-  reloadDelay = 30000;
-
-  instanceNumber = 0;
-  bigText = false;
-  bigLabels = false;
-  longData = true;
-  specialReplace = true;
-
-  setArrays(NEWSLOOKUPdataServer, sizeof(NEWSLOOKUPdataServer), NEWSLOOKUPdataPage,
-      sizeof(NEWSLOOKUPdataPage), NEWSLOOKUPelements,
-      sizeof(NEWSLOOKUPelements), sizeof(NEWSLOOKUPelements) / sizeof(*NEWSLOOKUPelements),
-      NEWSLOOKUPelementPreLabels, sizeof(NEWSLOOKUPelementPreLabels),
-      NEWSLOOKUPelementPreLabels, sizeof(NEWSLOOKUPelementPreLabels), NEWSLOOKUPdataEnd,
-      sizeof(NEWSLOOKUPdataEnd), NEWSLOOKUPelementCols, sizeof(NEWSLOOKUPelementCols));
-
-}
 void bbcnews() {
   //----------------------------------------------------------------------------------|
   //                                  BBC NEWS
@@ -497,10 +460,7 @@ unsigned long modeTimer = millis();
 typedef void (*modeSelect)();
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-//modeSelect mode[] = { weather, bigweather, stocks, bigstocks, ham, ham2, news, abcnews, bbcnews,
-//    nytnews };
-//modeSelect mode[] = { bbcnews, abcnews, nytnews, news };
-modeSelect mode[] = { weather, bigweather };
+modeSelect mode[] = { weather, bigweather, stocks, bigstocks, ham, ham2, abcnews, bbcnews,nytnews };
 
 int currentModeNumber = 0;
 void loop() {
