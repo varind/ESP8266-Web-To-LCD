@@ -109,6 +109,17 @@ boolean connect;
 uint32_t lastConnectTry = 0;
 int status = WL_IDLE_STATUS;
 
+bool startup = true;
+unsigned long modeTimer = millis();
+
+typedef void (*modeSelect)();
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+modeSelect mode[] = { weather, bigweather, stocks, bigstocks, ham, ham2, abcnews, bbcnews,nytnews };
+
+int currentModeNumber = 0;
+
+
+
 void bbcnews() {
   //----------------------------------------------------------------------------------|
   //                                  BBC NEWS
@@ -453,16 +464,7 @@ void setup() {
   connect = strlen(ssid) > 0; // Request WLAN connect if there is a SSID
 }
 
-bool startup = true;
 
-unsigned long modeTimer = millis();
-
-typedef void (*modeSelect)();
-
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-modeSelect mode[] = { weather, bigweather, stocks, bigstocks, ham, ham2, abcnews, bbcnews,nytnews };
-
-int currentModeNumber = 0;
 void loop() {
   if (startup == true) {
     mode[0]();
